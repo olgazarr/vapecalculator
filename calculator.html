@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vape and Go - Nic Salt Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .calculator-card {
+            background-color: #ffffff;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-radius: 1.5rem; /* 24px */
+        }
+        .input-field {
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            background-color: #ffffff;
+            border-color: #1AB02A;
+            box-shadow: 0 0 0 3px rgba(26, 176, 42, 0.2);
+            outline: none;
+        }
+        .btn-primary {
+            background-color: #1AB02A;
+            transition: all 0.3s ease;
+            transform: translateY(0);
+            box-shadow: 0 4px 6px -1px rgba(26, 176, 42, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-primary:hover {
+            background-color: #1faa35;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(26, 176, 42, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-secondary {
+            background-color: #e5e7eb;
+            transition: background-color 0.3s ease;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+        #error-message, #results {
+            transition: all 0.5s ease-in-out;
+        }
+        .swoop-in {
+            animation: swoopIn 0.5s ease-out forwards;
+        }
+        @keyframes swoopIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .product-card {
+             background-color: #ffffff;
+             border-radius: 1rem;
+             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+             overflow: hidden;
+             transition: all 0.3s ease;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="flex flex-col items-center justify-center min-h-screen py-12 px-4">
+        <!-- Main Calculator Card -->
+        <div class="calculator-card w-full max-w-md p-6 sm:p-8">
+            
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-extrabold" style="color: #1AB02A;">Vape and Go</h1>
+                <h2 class="text-2xl font-semibold text-gray-700 -mt-1">Nic Salt Calculator</h2>
+                <p class="text-gray-500 mt-4">Your perfect e-liquid recipe is just a few clicks away.</p>
+            </div>
+
+            <!-- Form -->
+            <form id="nic-salt-form" class="space-y-5">
+                <!-- Desired Nicotine Strength -->
+                <div>
+                    <label for="desired-strength" class="block text-sm font-medium text-gray-700 mb-1">Desired Strength</label>
+                    <input type="number" id="desired-strength" class="input-field w-full p-3 rounded-lg text-gray-900" placeholder="e.g., 20">
+                    <p class="text-xs text-gray-400 mt-1 pl-1">Typically 10-50 mg/mL</p>
+                </div>
+
+                <!-- Total E-liquid Volume -->
+                <div>
+                    <label for="total-volume" class="block text-sm font-medium text-gray-700 mb-1">Total Amount to Make</label>
+                    <input type="number" id="total-volume" class="input-field w-full p-3 rounded-lg text-gray-900" placeholder="e.g., 60">
+                    <p class="text-xs text-gray-400 mt-1 pl-1">Commonly 30, 60, or 100 mL</p>
+                </div>
+
+                <!-- Nicotine Salt Base Strength -->
+                <div>
+                    <label for="base-strength" class="block text-sm font-medium text-gray-700 mb-1">Nicotine Base Strength</label>
+                    <input type="number" id="base-strength" class="input-field w-full p-3 rounded-lg text-gray-900" placeholder="e.g., 100">
+                    <p class="text-xs text-gray-400 mt-1 pl-1">Usually 72 or 100 mg/mL</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                    <button type="button" id="calculate-btn" class="btn-primary w-full text-white font-bold py-3 px-4 rounded-lg">Create My Juice!</button>
+                    <button type="button" id="reset-btn" class="btn-secondary w-full sm:w-auto font-bold py-3 px-4 rounded-lg">Start Over</button>
+                </div>
+            </form>
+
+            <!-- Error Message Display -->
+            <div id="error-message" class="mt-4 text-red-600 text-center font-medium opacity-0 h-0"></div>
+
+            <!-- Results Section -->
+            <div id="results" class="mt-8 pt-6 border-t border-gray-200 hidden">
+                <h2 class="text-2xl font-bold text-center mb-4 text-gray-900">Your Perfect Mix is Ready! 🧪</h2>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+                        <span class="font-medium text-gray-600">Add Nicotine Salt Base:</span>
+                        <span id="nic-salt-result" class="text-lg font-bold" style="color: #1AB02A;">0.00 mL</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+                        <span class="font-medium text-gray-600">Add Flavoring / PG / VG:</span>
+                        <span id="flavoring-result" class="text-lg font-bold text-gray-800">0.00 mL</span>
+                    </div>
+                     <div class="flex justify-between items-center bg-gray-100 p-4 rounded-lg">
+                        <span class="font-medium text-gray-600">Cigarette Equivalent*:</span>
+                        <span id="cigarette-equiv-result" class="text-lg font-bold text-gray-800">~0 / day</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mt-3 text-center">*This is a rough guide. A 20mg strength is often compared to a 20-a-day smoking habit.</p>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="w-full max-w-4xl mx-auto mt-16 px-4 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">How Vape and Go Calculator Works</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Ever wondered how to mix your own e-liquid to get that *perfect* strength? Our super-cool calculator makes it incredibly simple! Just tell us what you're aiming for, and we'll do the complex math for you in a flash.
+            </p>
+            <div class="mt-8 grid md:grid-cols-3 gap-8 text-left">
+                <!-- Card 1: What you tell us -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="font-bold text-xl mb-2" style="color: #1AB02A;">1. Your Goal</h3>
+                    <p class="text-gray-600">You provide three simple numbers: the final nicotine strength you want, the total amount of juice you're making, and the strength of your concentrated nicotine base.</p>
+                </div>
+                <!-- Card 2: What we do -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="font-bold text-xl mb-2" style="color: #1AB02A;">2. The Magic</h3>
+                    <p class="text-gray-600">Our calculator instantly figures out the precise recipe. No more guesswork or complicated spreadsheets! It ensures your mix is accurate and safe, every single time.</p>
+                </div>
+                <!-- Card 3: What you get -->
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <h3 class="font-bold text-xl mb-2" style="color: #1AB02A;">3. The Results</h3>
+                    <p class="text-gray-600">We show you exactly how much Nicotine Salt Base and how much Flavoring/PG/VG to add. We even give a handy "Cigarette Equivalent" to help you gauge the strength.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Content Sections -->
+        <div class="w-full max-w-5xl mx-auto mt-16 px-4">
+            
+            <!-- Featured Nic Salts Section -->
+            <div class="mb-16">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Top Nic Salt Picks</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                    
+                    <!-- Example Product Card 1 -->
+                    <div class="product-card">
+                        <img src="https://placehold.co/600x400/1AB02A/FFFFFF?text=Brand+A" alt="Brand A Nic Salt" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-xl mb-1">Brand A - Blue Razz</h3>
+                            <p class="text-gray-600 mb-4">20mg/mL - 30mL</p>
+                            <a href="#" class="btn-primary text-white font-bold py-2 px-4 rounded-lg inline-block w-full text-center">View Product</a>
+                        </div>
+                    </div>
+
+                    <!-- Example Product Card 2 -->
+                    <div class="product-card">
+                        <img src="https://placehold.co/600x400/1AB02A/FFFFFF?text=Brand+B" alt="Brand B Nic Salt" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-xl mb-1">Brand B - Mango Tango</h3>
+                            <p class="text-gray-600 mb-4">35mg/mL - 30mL</p>
+                            <a href="#" class="btn-primary text-white font-bold py-2 px-4 rounded-lg inline-block w-full text-center">View Product</a>
+                        </div>
+                    </div>
+
+                    <!-- Example Product Card 3 -->
+                    <div class="product-card">
+                        <img src="https://placehold.co/600x400/1AB02A/FFFFFF?text=Brand+C" alt="Brand C Nic Salt" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-xl mb-1">Brand C - Minty Fresh</h3>
+                            <p class="text-gray-600 mb-4">10mg/mL - 60mL</p>
+                            <a href="#" class="btn-primary text-white font-bold py-2 px-4 rounded-lg inline-block w-full text-center">View Product</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Helpful Guides Section -->
+            <div>
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Helpful Guides</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                    
+                    <!-- Example Guide Card 1 -->
+                    <div class="product-card">
+                        <img src="https://placehold.co/600x400/374151/FFFFFF?text=Guide" alt="Guide to Steeping" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-xl mb-1">Guide to Steeping</h3>
+                            <p class="text-gray-600 mb-4">Learn how to improve your e-liquid flavor over time.</p>
+                            <a href="#" class="btn-secondary font-bold py-2 px-4 rounded-lg inline-block w-full text-center">Read More</a>
+                        </div>
+                    </div>
+
+                    <!-- Example Guide Card 2 -->
+                    <div class="product-card">
+                        <img src="https://placehold.co/600x400/374151/FFFFFF?text=Guide" alt="Choosing Your Strength" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-xl mb-1">Choosing Your Strength</h3>
+                            <p class="text-gray-600 mb-4">Find the perfect nicotine level for your needs.</p>
+                            <a href="#" class="btn-secondary font-bold py-2 px-4 rounded-lg inline-block w-full text-center">Read More</a>
+                        </div>
+                    </div>
+
+                    <!-- Example Guide Card 3 -->
+                    <div class="product-card">
+                        <img src="https://placehold.co/600x400/374151/FFFFFF?text=Guide" alt="PG vs VG Explained" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="font-bold text-xl mb-1">PG vs. VG Explained</h3>
+                            <p class="text-gray-600 mb-4">Understand the core components of your e-liquid.</p>
+                            <a href="#" class="btn-secondary font-bold py-2 px-4 rounded-lg inline-block w-full text-center">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <script>
+        // DOM Element References
+        const calculateBtn = document.getElementById('calculate-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const desiredStrengthInput = document.getElementById('desired-strength');
+        const totalVolumeInput = document.getElementById('total-volume');
+        const baseStrengthInput = document.getElementById('base-strength');
+        const resultsDiv = document.getElementById('results');
+        const nicSaltResultSpan = document.getElementById('nic-salt-result');
+        const flavoringResultSpan = document.getElementById('flavoring-result');
+        const cigaretteEquivResultSpan = document.getElementById('cigarette-equiv-result');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        /**
+         * Displays an error message to the user.
+         * @param {string} message - The error message to display.
+         */
+        function showErrorMessage(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.classList.remove('opacity-0', 'h-0');
+            errorMessageDiv.classList.add('opacity-100', 'h-auto', 'p-2');
+        }
+
+        /**
+         * Hides the error message.
+         */
+        function hideErrorMessage() {
+            errorMessageDiv.classList.remove('opacity-100', 'h-auto', 'p-2');
+            errorMessageDiv.classList.add('opacity-0', 'h-0');
+            errorMessageDiv.textContent = '';
+        }
+        
+        /**
+         * Performs the calculation for the e-liquid mix.
+         */
+        function calculateMix() {
+            // 1. Clear previous errors and hide results
+            hideErrorMessage();
+            resultsDiv.classList.add('hidden');
+            resultsDiv.classList.remove('swoop-in');
+
+
+            // 2. Get and parse input values
+            const desiredStrength = parseFloat(desiredStrengthInput.value);
+            const totalVolume = parseFloat(totalVolumeInput.value);
+            const baseStrength = parseFloat(baseStrengthInput.value);
+
+            // 3. Input Validation
+            if (isNaN(desiredStrength) || isNaN(totalVolume) || isNaN(baseStrength)) {
+                showErrorMessage('Please fill in all fields with valid numbers.');
+                return;
+            }
+            if (desiredStrength < 0 || totalVolume <= 0 || baseStrength <= 0) {
+                showErrorMessage('All values must be positive, and volumes greater than zero.');
+                return;
+            }
+            if (desiredStrength > baseStrength) {
+                showErrorMessage('Desired strength cannot be higher than the base strength.');
+                return;
+            }
+
+            // 4. Perform the calculation
+            const nicSaltVolume = (desiredStrength * totalVolume) / baseStrength;
+            const flavoringVolume = totalVolume - nicSaltVolume;
+            // A common industry heuristic is that mg strength roughly equals daily cigarette habit
+            const cigaretteEquivalent = desiredStrength;
+
+            // 5. Display the results
+            nicSaltResultSpan.textContent = `${nicSaltVolume.toFixed(2)} mL`;
+            flavoringResultSpan.textContent = `${flavoringVolume.toFixed(2)} mL`;
+            cigaretteEquivResultSpan.textContent = `~${cigaretteEquivalent.toFixed(0)} / day`;
+            resultsDiv.classList.remove('hidden');
+            resultsDiv.classList.add('swoop-in');
+        }
+
+        /**
+         * Resets the calculator to its initial state.
+         */
+        function resetCalculator() {
+            document.getElementById('nic-salt-form').reset();
+            resultsDiv.classList.add('hidden');
+            resultsDiv.classList.remove('swoop-in');
+            hideErrorMessage();
+            desiredStrengthInput.focus();
+        }
+
+        // Event Listeners
+        calculateBtn.addEventListener('click', calculateMix);
+        resetBtn.addEventListener('click', resetCalculator);
+
+        // Allow pressing Enter to calculate
+        document.getElementById('nic-salt-form').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault(); // Prevent form submission
+                calculateMix();
+            }
+        });
+    </script>
+
+</body>
+</html>
